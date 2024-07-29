@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with PDF</title>
+</head>
+<body>
+    <h1>Upload a PDF and Chat with It</h1>
+    <input type="file" id="pdfFile" accept="application/pdf">
+    <button onclick="uploadPdf()">Upload PDF</button>
+    <br><br>
+    <textarea id="pdfText" rows="10" cols="50" readonly></textarea>
+    <br><br>
+    <input type="text" id="question" placeholder="Ask a question...">
+    <button onclick="chat()">Chat</button>
+    <br><br>
+    <textarea id="response" rows="5" cols="50" readonly></textarea>
+
+    <script>
+        async function uploadPdf() {
+            const fileInput = document.getElementById('pdfFile');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            const response = await fetch('/upload/', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            document.getElementById('pdfText').value = data.text;
+        }
+
+        async function chat() {
+            const text = document.getElementById('pdfText').value;
+            const question = document.getElementById('question').value;
+            const response = await fetch('/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text, question: question })
+            });
+            const data = await response.json();
+            document.getElementById('response').value = data.answer;
+        }
+    </script>
+</body>
+</html>
