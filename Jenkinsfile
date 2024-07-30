@@ -4,9 +4,11 @@ pipeline {
     stages {
         stage('SCM Checkout') {
             steps {
-                retry(3) {
-                    git branch: 'master', url: 'https://github.com/OsadaInduwara/chatwithpdf.git'
-                }
+                checkout scm: [
+                    $class: 'GitSCM',
+                    branches: [[name: '*/master']],
+                    userRemoteConfigs: [[url: 'https://github.com/OsadaInduwara/chatwithpdf.git', credentialsId: 'docker-hub-credentials']]
+                ]
             }
         }
         stage('Build Docker Image') {
