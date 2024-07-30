@@ -1,51 +1,37 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = "chatwithpdf"
-        REGISTRY_CREDENTIALS = credentials('docker-hub-credentials')
-        REGISTRY = "osadainduwara/chatwithpdf"
-    }
-
     stages {
-        stage('Clone repository') {
+        stage('SCM Checkout') {
             steps {
-                git 'https://github.com/OsadaInduwara/chatwithpdf.git'
-            }
-        }
-
-        stage('Build Docker image') {
-            steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                retry(3) {
+                    git branch: 'main', url: 'https://github.com/OsadaInduwara/chatwithpdf.git'
                 }
             }
         }
-
-        stage('Test') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    docker.image("${DOCKER_IMAGE}:${BUILD_NUMBER}").inside {
-                        sh 'pytest'
+                sh 'docker build -t chatwithpdf:${BUILD_NUMBER} .'
+            }
+        }
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-hub-credentials', variable: 'DOCKER_PASSWORD')]) {
+                    script {
+                        sh "echo ${DOCKER_PASSWORD} | docker login -u osadainduwara --password-stdin"
                     }
                 }
             }
         }
-
-        stage('Push to Docker Hub') {
+        stage('Push Image') {
             steps {
-                script {
-                    docker.withRegistry('', REGISTRY_CREDENTIALS) {
-                        docker.image("${DOCKER_IMAGE}:${BUILD_NUMBER}").push('latest')
-                    }
-                }
+                sh 'osadainduwara/chatwithpdf:${BUILD_NUMBER}'
             }
         }
-
-        stage('Deploy') {
-            steps {
-                // Add deployment steps here, e.g., deploy to AWS, Kubernetes, etc.
-            }
+    }
+    post {
+        always {
+            sh 'docker logout'
         }
     }
 }
