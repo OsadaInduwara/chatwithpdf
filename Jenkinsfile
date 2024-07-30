@@ -5,7 +5,7 @@ pipeline {
         stage('SCM Checkout') {
             steps {
                 retry(3) {
-                    git branch: 'main', url: 'https://github.com/OsadaInduwara/chatwithpdf.git'
+                    git branch: 'master', url: 'https://github.com/OsadaInduwara/chatwithpdf.git'
                 }
             }
         }
