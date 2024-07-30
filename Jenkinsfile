@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "chatwithpdf"
         REGISTRY_CREDENTIALS = credentials('docker-hub-credentials')
-        REGISTRY = "your-docker-hub-username/chatwithpdf"
+        REGISTRY = "osadainduwara/chatwithpdf"
     }
 
     stages {
